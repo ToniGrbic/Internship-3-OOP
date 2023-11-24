@@ -35,7 +35,7 @@ do
             PrintAllContacts();
             break;
         case "2":
-            
+            AddNewContact();
             break;
         case "3":
             Console.WriteLine("Brisanje kontakata iz imenika");
@@ -48,42 +48,137 @@ do
             break;
         case "0":
             loopState = Loop.BREAK;
-            Console.WriteLine("");
+            Console.WriteLine("Izlaz...");
             break;
         default:
-            Console.WriteLine("Nepostojeća opcija, pokušaj ponovo");
+            Console.WriteLine("Nepostojeća opcija, pokušaj ponovo...");
             loopState = Loop.CONTINUE;
             break;
     }
     Console.Clear();
 } while(loopState == Loop.CONTINUE);
 
+
+
 void PrintAllContacts()
 {
     Console.WriteLine(
-        "\nALL CONTACTS:\n" +
+        $"\nKONTAKTI (Count - {contacts.Count}):\n" +
         "****************************\n");
     foreach (var (contact, calls) in contacts)
     {
         Console.WriteLine(contact.ToString());
     }
-    Console.WriteLine("\nPress any key to continue...");
-    var c = Console.ReadKey();
+    ContinueAndClearConsole();
+}
+void AddNewContact()
+{
+    Loop loopState = Loop.CONTINUE;
+    bool success;
+    string phoneNumber;
+    do{
+        Console.WriteLine(
+               "\nNOVI KONTAKT:\n" +
+               "****************************\n"
+        );
+        Console.WriteLine("Unesi ime i prezime (format: Ime Prezime): ");
+        var nameAndSurname = InputNonEmptyString("Ime i prezime");
+
+        do{
+            Console.WriteLine("Unesi broj mobitela: ");
+            phoneNumber = InputNonEmptyString("Broj mobitela");
+            success = contacts.Keys.Count(x => x.phoneNumber == phoneNumber) == 0;
+            if (!success)
+                Console.WriteLine("Kontakt sa tim brojem već postoji, pokušaj ponovo\n");
+        }while (!success);
+       
+        Console.WriteLine("Unesi preferencu: ");
+        var preference = InputPreferenceForContact();
+        Contact contact = new Contact(nameAndSurname, phoneNumber, preference);
+
+        Console.WriteLine(contact.ToString());
+        Console.WriteLine("Potvrdi unos? (da - za unos)");
+        loopState = ConfirmationDialogForDataChange();
+
+        if (loopState != Loop.CONTINUE){
+            contacts.Add(contact, new List<Call>());
+            Console.WriteLine("Kontakt uspješno dodan!\n");
+        }
+            
+        Console.WriteLine("Zelis li nastavit sa dodavanjem kontakata? (da - za nastavak)");
+        loopState = ConfirmationDialog();
+        Console.Clear();
+    } while (loopState == Loop.CONTINUE);   
 }
 
-string InputNonEmptyString(string message)
+void ContinueAndClearConsole()
+{
+    Console.WriteLine("\nPritisni neku tipku za nastavak...");
+    var c = Console.ReadKey();
+    Console.Clear();
+}
+string InputNonEmptyString(string message = "unos")
 {
     string input;
     do
     {
         input = Console.ReadLine();
         if(input == "")
-            Console.WriteLine(message + "nemože biti prazan string, pokušaj ponovo\n");
+            Console.WriteLine(message + " nemože biti prazan string, pokušaj ponovo\n");
         
     } while (input == "");
     return input;
 }
 
+Loop ConfirmationDialog()
+{
+    
+    var option = InputNonEmptyString();
+
+    if (option.ToLower() == "da"){
+        return Loop.CONTINUE;
+    }
+    return Loop.BREAK;
+   
+}
+
+Loop ConfirmationDialogForDataChange()
+{
+
+    var option = InputNonEmptyString();
+
+    if (option.ToLower() == "da")
+    {
+        return Loop.BREAK;
+    }
+    return Loop.CONTINUE;
+
+}
+
+Preferences InputPreferenceForContact()
+{
+    Console.WriteLine(
+        "Odaberi opciju preference:\n" +
+        "1 - FAVOURITE\n" +
+        "2 - REGULAR\n" +
+        "3 - BLOCKED\n"
+    );
+    do {        
+       var choice = InputNonEmptyString("Odabir opcije");
+       switch (choice)
+       {
+            case "1":
+                return Preferences.FAVOURITE;
+            case "2":
+                return Preferences.REGULAR;
+            case "3":
+                return Preferences.BLOCKED;
+            default:
+                Console.WriteLine("Nepostojeća opcija, pokušaj ponovo...");
+                break;
+        }
+    } while (true);
+}
 enum Loop { CONTINUE, BREAK }
 
 

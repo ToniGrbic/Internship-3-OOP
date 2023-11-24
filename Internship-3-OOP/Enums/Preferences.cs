@@ -8,8 +8,8 @@ namespace Internship_3_OOP.Enums
 {
     public enum Preferences
     {
-        FAVOURITE,
-        REGULAR,
-        BLOCKED,
+        FAVOURITE = 1,
+        REGULAR = 2,
+        BLOCKED = 3,
     }
 }
