@@ -3,6 +3,7 @@ using Internship_3_OOP.Classes;
 using Internship_3_OOP.Enums;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.Design;
 
 Loop loopState = Loop.CONTINUE;
 
@@ -10,15 +11,10 @@ Dictionary<Contact, List<Call>> contacts = new()
 {
     { new Contact("Ivan", "123456789", Preferences.FAVOURITE), new List<Call>() },
     { new Contact("Marko", "987654321", Preferences.REGULAR), new List<Call>() },
-    { new Contact("Sime", "123456789", Preferences.BLOCKED), new List<Call>() },
-
+    { new Contact("Sime", "121212121", Preferences.BLOCKED), new List<Call>() },
 };
 
-if (contacts.Keys.Count(x => x.phoneNumber == "123456789") > 1)
-    Console.WriteLine("has contacts with same numbers");
-
-do
-{
+do{
     Console.WriteLine(
         "MENU:\n" +
         "1. Ispis svih kontakata\n" +
@@ -38,15 +34,15 @@ do
             AddNewContact();
             break;
         case "3":
-            Console.WriteLine("Brisanje kontakata iz imenika");
+            DeleteContact();
             break;
         case "4":
-            Console.WriteLine("Editiranje preference kontakta");
+            EditContactPreference();
             break;
         case "5":
             Console.WriteLine("Upravljanje kontaktom");
             break;
-        case "0":
+        case "6":
             loopState = Loop.BREAK;
             Console.WriteLine("Izlaz...");
             break;
@@ -97,7 +93,7 @@ void AddNewContact()
         Contact contact = new Contact(nameAndSurname, phoneNumber, preference);
 
         Console.WriteLine(contact.ToString());
-        Console.WriteLine("Potvrdi unos? (da - za unos)");
+        Console.WriteLine($"Potvrdi unos kontakta {nameAndSurname}? (da - za unos)");
         loopState = ConfirmationDialogForDataChange();
 
         if (loopState != Loop.CONTINUE){
@@ -109,6 +105,74 @@ void AddNewContact()
         loopState = ConfirmationDialog();
         Console.Clear();
     } while (loopState == Loop.CONTINUE);   
+}
+
+void DeleteContact()
+{
+    Loop loopState = Loop.CONTINUE;
+    do{
+        Console.WriteLine(
+               "\nBRISANJE KONTAKTA:\n" +
+               "****************************\n"
+        );
+        Console.WriteLine("Unesi broj mobitela: ");
+        var phoneNumber = InputNonEmptyString("Broj mobitela");
+        var contact = contacts.Keys.FirstOrDefault(x => x.phoneNumber == phoneNumber);
+        if (contact == null)
+        {    
+            Console.WriteLine("Kontakt sa tim brojem ne postoji, pokušaj ponovo\n");
+            ContinueAndClearConsole();
+            continue;
+        }
+        Console.WriteLine(contact.ToString());
+        Console.WriteLine($"Jeste li sigurni da želite obrisati kontakt: {contact.nameAndSurname} - {contact.phoneNumber}? (da - za brisanje)");
+        loopState = ConfirmationDialogForDataChange();
+        if (loopState != Loop.CONTINUE)
+        {
+            if(contacts.Remove(contact))
+                Console.WriteLine("Kontakt uspješno obrisan!\n");
+            else
+                Console.WriteLine("Greška: Kontakt nije obrisan!\n");
+        }
+        Console.WriteLine("Zelis li nastavit sa brisanjem kontakata? (da - za nastavak)");
+        loopState = ConfirmationDialog();
+        Console.Clear();
+    }while(loopState == Loop.CONTINUE);
+    
+}
+
+void EditContactPreference()
+{
+    Loop loopState = Loop.CONTINUE;
+    do
+    {
+        Console.WriteLine(
+                "\nEDITIRANJE KONTAKTA:\n" +
+                "****************************\n"
+        );
+        Console.WriteLine("Unesi broj mobitela: ");
+        var phoneNumber = InputNonEmptyString("Broj mobitela");
+        var contact = contacts.Keys.FirstOrDefault(x => x.phoneNumber == phoneNumber);
+        
+        if (contact == null)
+        {
+            Console.WriteLine("Kontakt sa tim brojem ne postoji, pokušaj ponovo\n");
+            ContinueAndClearConsole();
+            continue;
+        }
+       
+        Console.WriteLine(contact.ToString());
+        Console.WriteLine("Uredi preferencu? (da - nastavak):");
+        if (ConfirmationDialog() == 0)
+        {
+            contact.preference = InputPreferenceForContact();
+        }
+        
+        Console.WriteLine("Zelis li nastavit sa uređivanjem kontakata? (da - za nastavak)");
+        loopState = ConfirmationDialog();
+        Console.Clear();
+    } while (loopState == Loop.CONTINUE);
+
 }
 
 void ContinueAndClearConsole()
@@ -132,19 +196,16 @@ string InputNonEmptyString(string message = "unos")
 
 Loop ConfirmationDialog()
 {
-    
     var option = InputNonEmptyString();
 
     if (option.ToLower() == "da"){
         return Loop.CONTINUE;
     }
     return Loop.BREAK;
-   
 }
 
 Loop ConfirmationDialogForDataChange()
 {
-
     var option = InputNonEmptyString();
 
     if (option.ToLower() == "da")
@@ -152,13 +213,12 @@ Loop ConfirmationDialogForDataChange()
         return Loop.BREAK;
     }
     return Loop.CONTINUE;
-
 }
 
 Preferences InputPreferenceForContact()
 {
     Console.WriteLine(
-        "Odaberi opciju preference:\n" +
+        "\nOdaberi opciju:\n" +
         "1 - FAVOURITE\n" +
         "2 - REGULAR\n" +
         "3 - BLOCKED\n"

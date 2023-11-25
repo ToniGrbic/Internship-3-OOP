@@ -26,12 +26,11 @@ namespace Internship_3_OOP.Classes
             if (obj == null || obj is Contact)
                 return false;
             Contact contact = (Contact)obj;
-            return (phoneNumber == contact.phoneNumber);
+            return ((phoneNumber == contact.phoneNumber) && (nameAndSurname == contact.nameAndSurname));
         }
-
         public override int GetHashCode()
         {
-            return StringComparer.OrdinalIgnoreCase.GetHashCode(phoneNumber);
+            return HashCode.Combine(phoneNumber, nameAndSurname);
         }
         public override string ToString()
         {
@@ -39,5 +38,7 @@ namespace Internship_3_OOP.Classes
                    $"\tNumber: {phoneNumber}\n" +
                    $"\tPreference: {preference}\n";
         }
+
+        
     }
 }
