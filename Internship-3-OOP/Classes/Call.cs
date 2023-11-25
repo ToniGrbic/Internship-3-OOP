@@ -9,12 +9,38 @@ namespace Internship_3_OOP.Classes
 {
     public class Call
     {
-        private DateTime timeOfCall;
+        public DateTime timeOfCall;
         private CallStatus status;
         public Call() {
             this.timeOfCall = DateTime.Now;
             this.status = CallStatus.OUTGOING;
         }
-        
+        public Call(DateTime dateTime)
+        {
+            this.timeOfCall = dateTime;
+            this.status = CallStatus.OUTGOING;
+        }
+        public override string ToString()
+        {
+            return $"Call: " +
+                   $"\n\tTime of call: {timeOfCall}" +
+                   $"\n\tStatus: {status}";
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null || GetType() != obj.GetType())
+            {
+                return false;
+            }
+
+            Call other = (Call)obj;
+            return timeOfCall == other.timeOfCall && status == other.status;
+        }
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(timeOfCall, status);
+        }
+
     }
 }

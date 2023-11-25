@@ -9,9 +9,9 @@ Loop loopState = Loop.CONTINUE;
 
 Dictionary<Contact, List<Call>> contacts = new()
 {
-    { new Contact("Ivan", "123456789", Preferences.FAVOURITE), new List<Call>() },
-    { new Contact("Marko", "987654321", Preferences.REGULAR), new List<Call>() },
-    { new Contact("Sime", "121212121", Preferences.BLOCKED), new List<Call>() },
+    { new Contact("Ivan", "123456789", Preferences.FAVOURITE), new List<Call>() { new Call(new DateTime(2023,12,23,12,2,4)), new Call(new DateTime(2023, 11, 26, 16, 15, 4)) } },
+    { new Contact("Marko", "987654321", Preferences.REGULAR), new List<Call>() { new Call(), new Call() } },
+    { new Contact("Sime", "121212121", Preferences.BLOCKED), new List<Call>() { new Call(), new Call() } },
 };
 
 do{
@@ -40,7 +40,9 @@ do{
             EditContactPreference();
             break;
         case "5":
-            Console.WriteLine("Upravljanje kontaktom");
+            var contact = FindContact();
+            Console.Clear();
+            ContactManagmentSubmenu(contact);
             break;
         case "6":
             loopState = Loop.BREAK;
@@ -115,15 +117,8 @@ void DeleteContact()
                "\nBRISANJE KONTAKTA:\n" +
                "****************************\n"
         );
-        Console.WriteLine("Unesi broj mobitela: ");
-        var phoneNumber = InputNonEmptyString("Broj mobitela");
-        var contact = contacts.Keys.FirstOrDefault(x => x.phoneNumber == phoneNumber);
-        if (contact == null)
-        {    
-            Console.WriteLine("Kontakt sa tim brojem ne postoji, pokušaj ponovo\n");
-            ContinueAndClearConsole();
-            continue;
-        }
+        var contact = FindContact();
+
         Console.WriteLine(contact.ToString());
         Console.WriteLine($"Jeste li sigurni da želite obrisati kontakt: {contact.nameAndSurname} - {contact.phoneNumber}? (da - za brisanje)");
         loopState = ConfirmationDialogForDataChange();
@@ -138,7 +133,6 @@ void DeleteContact()
         loopState = ConfirmationDialog();
         Console.Clear();
     }while(loopState == Loop.CONTINUE);
-    
 }
 
 void EditContactPreference()
@@ -150,36 +144,100 @@ void EditContactPreference()
                 "\nEDITIRANJE KONTAKTA:\n" +
                 "****************************\n"
         );
-        Console.WriteLine("Unesi broj mobitela: ");
-        var phoneNumber = InputNonEmptyString("Broj mobitela");
-        var contact = contacts.Keys.FirstOrDefault(x => x.phoneNumber == phoneNumber);
+        var contact = FindContact();
         
-        if (contact == null)
-        {
-            Console.WriteLine("Kontakt sa tim brojem ne postoji, pokušaj ponovo\n");
-            ContinueAndClearConsole();
-            continue;
-        }
-       
         Console.WriteLine(contact.ToString());
         Console.WriteLine("Uredi preferencu? (da - nastavak):");
         if (ConfirmationDialog() == 0)
         {
             contact.preference = InputPreferenceForContact();
         }
-        
         Console.WriteLine("Zelis li nastavit sa uređivanjem kontakata? (da - za nastavak)");
         loopState = ConfirmationDialog();
         Console.Clear();
     } while (loopState == Loop.CONTINUE);
-
 }
 
+void ContactManagmentSubmenu(Contact contact)
+{
+    
+    do
+    {
+        Console.WriteLine(contact.ToString());
+        Console.WriteLine(
+            "SUBMENU:\n" +
+            "1. Ispis svih poziva\n" +
+            "2. Novi poziv\n" +
+            "3. Izlaz\n"
+            
+        );
+        Console.WriteLine("Odaberi opciju: ");
+        var choice = InputNonEmptyString("Odabir opcije");
+        switch (choice)
+        {
+            case "1":
+                PrintAllContactCalls(contact);
+                break;
+            case "2":
+                AddNewContactCall();
+                break;
+            case "3":
+                loopState = Loop.BREAK;
+                Console.WriteLine("Izlaz...");
+                break;
+            default:
+                Console.WriteLine("Nepostojeća opcija, pokušaj ponovo...");
+                loopState = Loop.CONTINUE;
+                break;
+        }
+        Console.Clear();
+    } while (loopState == Loop.CONTINUE);
+}
+
+void PrintAllContactCalls(Contact contact)
+{
+    Console.WriteLine(
+            $"\nPOZIVI KONTAKTA {contact.nameAndSurname}:\n" +
+            "****************************\n"
+    );
+    var sortedByDateCalls = contacts[contact].OrderBy(x => x.timeOfCall);
+    var calls = sortedByDateCalls;
+    foreach (var call in calls)
+    {
+        Console.WriteLine(call.ToString());
+    }
+    ContinueAndClearConsole();
+}
+
+void AddNewContactCall()
+{
+
+}
 void ContinueAndClearConsole()
 {
     Console.WriteLine("\nPritisni neku tipku za nastavak...");
     var c = Console.ReadKey();
     Console.Clear();
+}
+
+Contact FindContact()
+{
+    Contact? contact;
+    bool success;
+    do{
+
+        Console.WriteLine("Unesi broj mobitela: ");
+        var phoneNumber = InputNonEmptyString("Broj mobitela");
+        contact = contacts.Keys.FirstOrDefault(x => x.phoneNumber == phoneNumber);
+        success = contact != null;
+        if (!success)
+        {
+            Console.WriteLine("Kontakt sa tim brojem ne postoji, pokušaj ponovo\n");
+            ContinueAndClearConsole();
+        }
+        
+    }while(!success);
+    return contact;
 }
 string InputNonEmptyString(string message = "unos")
 {

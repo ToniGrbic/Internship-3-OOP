@@ -23,14 +23,14 @@ namespace Internship_3_OOP.Classes
 
         public override bool Equals(object? obj)
         {
-            if (obj == null || obj is Contact)
+            if (obj == null || GetType() != obj.GetType())
                 return false;
             Contact contact = (Contact)obj;
-            return ((phoneNumber == contact.phoneNumber) && (nameAndSurname == contact.nameAndSurname));
+            return ((phoneNumber == contact.phoneNumber) && (nameAndSurname == contact.nameAndSurname) && preference == contact.preference);
         }
         public override int GetHashCode()
         {
-            return HashCode.Combine(phoneNumber, nameAndSurname);
+            return HashCode.Combine(phoneNumber, nameAndSurname, preference);
         }
         public override string ToString()
         {
