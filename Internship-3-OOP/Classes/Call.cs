@@ -11,14 +11,17 @@ namespace Internship_3_OOP.Classes
     {
         public DateTime timeOfCall;
         private CallStatus status;
-        public Call() {
-            this.timeOfCall = DateTime.Now;
-            this.status = CallStatus.OUTGOING;
-        }
+       
         public Call(DateTime dateTime)
         {
             this.timeOfCall = dateTime;
             this.status = CallStatus.OUTGOING;
+        }
+
+        public Call(CallStatus status)
+        {
+            this.timeOfCall = DateTime.Now;
+            this.status = status;
         }
         public override string ToString()
         {

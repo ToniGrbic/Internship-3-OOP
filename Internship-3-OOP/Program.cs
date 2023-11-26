@@ -6,15 +6,32 @@ using System.ComponentModel;
 using System.ComponentModel.Design;
 
 Loop loopState = Loop.CONTINUE;
+const int MAX_PHONE_NUM_LENGTH = 15;
 
 Dictionary<Contact, List<Call>> contacts = new()
 {
-    { new Contact("Ivan", "123456789", Preferences.FAVOURITE), new List<Call>() { new Call(new DateTime(2023,12,23,12,2,4)), new Call(new DateTime(2023, 11, 26, 16, 15, 4)) } },
-    { new Contact("Marko", "987654321", Preferences.REGULAR), new List<Call>() { new Call(), new Call() } },
-    { new Contact("Sime", "121212121", Preferences.BLOCKED), new List<Call>() { new Call(), new Call() } },
+    { new Contact("Ivan", "123456789", Preferences.FAVOURITE), 
+        new List<Call>() { 
+            new Call(new DateTime(2023,11,23,23,2,5)), 
+            new Call(new DateTime(2023, 11, 26, 16, 15, 4)) 
+        } 
+    },
+    { new Contact("Marko", "987654321", Preferences.REGULAR), 
+        new List<Call>() { 
+            new Call(new DateTime(2023, 11, 11, 13, 2, 4)), 
+            new Call(new DateTime(2023, 11, 15, 14, 21, 15)) 
+        } 
+    },
+    { new Contact("Sime", "121212121", Preferences.BLOCKED), 
+        new List<Call>() { 
+            new Call(new DateTime(2023, 10, 20, 11, 2, 4)), 
+            new Call(new DateTime(2023, 9, 17, 11, 5, 4)) 
+        } 
+    },
 };
 
 do{
+    
     Console.WriteLine(
         "MENU:\n" +
         "1. Ispis svih kontakata\n" +
@@ -50,7 +67,6 @@ do{
             break;
         default:
             Console.WriteLine("Nepostojeća opcija, pokušaj ponovo...");
-            loopState = Loop.CONTINUE;
             break;
     }
     Console.Clear();
@@ -84,7 +100,7 @@ void AddNewContact()
 
         do{
             Console.WriteLine("Unesi broj mobitela: ");
-            phoneNumber = InputNonEmptyString("Broj mobitela");
+            phoneNumber = InputPhoneNumber();
             success = contacts.Keys.Count(x => x.phoneNumber == phoneNumber) == 0;
             if (!success)
                 Console.WriteLine("Kontakt sa tim brojem već postoji, pokušaj ponovo\n");
@@ -160,7 +176,7 @@ void EditContactPreference()
 
 void ContactManagmentSubmenu(Contact contact)
 {
-    
+    Loop loopState = Loop.CONTINUE;
     do
     {
         Console.WriteLine(contact.ToString());
@@ -179,7 +195,7 @@ void ContactManagmentSubmenu(Contact contact)
                 PrintAllContactCalls(contact);
                 break;
             case "2":
-                AddNewContactCall();
+                CreateNewContactCall(contact);
                 break;
             case "3":
                 loopState = Loop.BREAK;
@@ -187,7 +203,6 @@ void ContactManagmentSubmenu(Contact contact)
                 break;
             default:
                 Console.WriteLine("Nepostojeća opcija, pokušaj ponovo...");
-                loopState = Loop.CONTINUE;
                 break;
         }
         Console.Clear();
@@ -209,9 +224,34 @@ void PrintAllContactCalls(Contact contact)
     ContinueAndClearConsole();
 }
 
-void AddNewContactCall()
+void CreateNewContactCall(Contact contact)
 {
-
+    if(contact.preference == Preferences.BLOCKED)
+    {
+        Console.WriteLine("Kontakt je blokiran, ne možeš napraviti poziv!\n");
+        ContinueAndClearConsole();
+        return;
+    }
+    var random = new Random();
+    var callStatus = (CallStatus)random.Next(0, 3);
+    var callDuration = random.Next(1, 21);
+    
+    for(int seconds = 0; seconds < callDuration; seconds++)
+    {
+        Console.Clear();
+        Console.WriteLine($"Poziv u tijeku: {seconds}s \n");
+        Thread.Sleep(1000);
+    }
+    Console.Clear();
+    Console.WriteLine(
+        "POZIV ZAVRŠEN!\n" +
+        "***********************\n" +
+        $"TRAJANJE: {callDuration}s\n" +
+        $"STATUS: {callStatus}\n"
+    );
+    var newCall = new Call(callStatus);
+    contacts[contact].Add(newCall);
+    ContinueAndClearConsole();
 }
 void ContinueAndClearConsole()
 {
@@ -227,7 +267,7 @@ Contact FindContact()
     do{
 
         Console.WriteLine("Unesi broj mobitela: ");
-        var phoneNumber = InputNonEmptyString("Broj mobitela");
+        var phoneNumber = InputPhoneNumber();
         contact = contacts.Keys.FirstOrDefault(x => x.phoneNumber == phoneNumber);
         success = contact != null;
         if (!success)
@@ -250,6 +290,28 @@ string InputNonEmptyString(string message = "unos")
         
     } while (input == "");
     return input;
+}
+
+string InputPhoneNumber()
+{
+    string phoneNum = "";
+    bool success;
+    do
+    {
+        success = int.TryParse(Console.ReadLine(), out int input);
+        if (!success)
+        {
+            Console.WriteLine("Broj mobitela može sadržavat samo znamenke, pokušaj ponovo\n");
+            continue;
+        }
+            
+        phoneNum = input.ToString();
+        success = phoneNum.Length <= MAX_PHONE_NUM_LENGTH;
+        if (!success)
+            Console.WriteLine("Broj mobitela može imat najviše 15 znamenki, pokušaj ponovo\n");
+
+    } while (!success);
+    return phoneNum;
 }
 
 Loop ConfirmationDialog()
