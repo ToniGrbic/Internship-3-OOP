@@ -31,14 +31,13 @@ Dictionary<Contact, List<Call>> contacts = new()
 };
 
 do{
-    
     Console.WriteLine(
         "MENU:\n" +
-        "1. Ispis svih kontakata\n" +
-        "2. Dodavanje novih kontakata u imenik\n" +
-        "3. Brisanje kontakata iz imenika\n" +
-        "4. Editiranje preference kontakta\n" +
-        "5. Upravljanje kontaktom\n"
+        "1 - Ispis svih kontakata\n" +
+        "2 - Dodavanje novih kontakata u imenik\n" +
+        "3 - Brisanje kontakata iz imenika\n" +
+        "4 - Editiranje preference kontakta\n" +
+        "5 - Upravljanje kontaktom\n"
     );
     Console.WriteLine("Odaberi opciju: ");
     var choice = InputNonEmptyString("Odabir opcije");
@@ -166,7 +165,8 @@ void EditContactPreference()
         Console.WriteLine("Uredi preferencu? (da - nastavak):");
         if (ConfirmationDialog() == 0)
         {
-            contact.preference = InputPreferenceForContact();
+            var preference = InputPreferenceForContact();
+            contact.EditPreferece(preference);
         }
         Console.WriteLine("Zelis li nastavit sa uređivanjem kontakata? (da - za nastavak)");
         loopState = ConfirmationDialog();
@@ -177,15 +177,13 @@ void EditContactPreference()
 void ContactManagmentSubmenu(Contact contact)
 {
     Loop loopState = Loop.CONTINUE;
-    do
-    {
+    do{
         Console.WriteLine(contact.ToString());
         Console.WriteLine(
             "SUBMENU:\n" +
-            "1. Ispis svih poziva\n" +
-            "2. Novi poziv\n" +
-            "3. Izlaz\n"
-            
+            "1 - Ispis svih poziva\n" +
+            "2 - Novi poziv\n" +
+            "3 - Izlaz\n"
         );
         Console.WriteLine("Odaberi opciju: ");
         var choice = InputNonEmptyString("Odabir opcije");
@@ -215,9 +213,10 @@ void PrintAllContactCalls(Contact contact)
             $"\nPOZIVI KONTAKTA {contact.nameAndSurname}:\n" +
             "****************************\n"
     );
-    var sortedByDateCalls = contacts[contact].OrderBy(x => x.timeOfCall);
-    var calls = sortedByDateCalls;
-    foreach (var call in calls)
+    var calls = contacts[contact];
+    var callsSortedByDate = calls.OrderBy(call => call.GetTime());
+    
+    foreach (var call in callsSortedByDate)
     {
         Console.WriteLine(call.ToString());
     }
@@ -226,7 +225,7 @@ void PrintAllContactCalls(Contact contact)
 
 void CreateNewContactCall(Contact contact)
 {
-    if(contact.preference == Preferences.BLOCKED)
+    if(contact.GetPreference() == Preferences.BLOCKED)
     {
         Console.WriteLine("Kontakt je blokiran, ne možeš napraviti poziv!\n");
         ContinueAndClearConsole();
@@ -234,9 +233,9 @@ void CreateNewContactCall(Contact contact)
     }
     var random = new Random();
     var callStatus = (CallStatus)random.Next(0, 3);
-    var callDuration = random.Next(1, 21);
+    var callDuration = random.Next(1, 20);
     
-    for(int seconds = 0; seconds < callDuration; seconds++)
+    for(int seconds = 0; seconds <= callDuration; seconds++)
     {
         Console.Clear();
         Console.WriteLine($"Poziv u tijeku: {seconds}s \n");
@@ -277,14 +276,14 @@ Contact FindContact()
         }
         
     }while(!success);
-    return contact;
+    return contact!;
 }
 string InputNonEmptyString(string message = "unos")
 {
     string input;
     do
     {
-        input = Console.ReadLine();
+        input = Console.ReadLine()!;
         if(input == "")
             Console.WriteLine(message + " nemože biti prazan string, pokušaj ponovo\n");
         

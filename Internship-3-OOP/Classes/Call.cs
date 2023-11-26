@@ -9,25 +9,30 @@ namespace Internship_3_OOP.Classes
 {
     public class Call
     {
-        public DateTime timeOfCall;
+        private DateTime timeOfCall;
         private CallStatus status;
        
         public Call(DateTime dateTime)
         {
-            this.timeOfCall = dateTime;
-            this.status = CallStatus.OUTGOING;
+            timeOfCall = dateTime;
+            status = CallStatus.OUTGOING;
         }
 
         public Call(CallStatus status)
         {
-            this.timeOfCall = DateTime.Now;
+            timeOfCall = DateTime.Now;
             this.status = status;
+        }
+
+        public DateTime GetTime()
+        {
+            return timeOfCall;
         }
         public override string ToString()
         {
-            return $"Call: " +
-                   $"\n\tTime of call: {timeOfCall}" +
-                   $"\n\tStatus: {status}";
+            return $"Call: \n" +
+                   $"\tTime of call: {timeOfCall}" +
+                   $"\tStatus: {status}";
         }
 
         public override bool Equals(object obj)
@@ -37,13 +42,12 @@ namespace Internship_3_OOP.Classes
                 return false;
             }
 
-            Call other = (Call)obj;
-            return timeOfCall == other.timeOfCall && status == other.status;
+            Call call = (Call)obj;
+            return (timeOfCall == call.timeOfCall) && (status == call.status);
         }
         public override int GetHashCode()
         {
             return HashCode.Combine(timeOfCall, status);
         }
-
     }
 }

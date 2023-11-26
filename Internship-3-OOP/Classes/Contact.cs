@@ -10,15 +10,25 @@ namespace Internship_3_OOP.Classes
 {
     public class Contact
     {
-        public string nameAndSurname { get; set; }
-        public string phoneNumber { get; set; }
-        public Preferences preference { get; set; }
+        public string nameAndSurname { get; }
+        public string phoneNumber { get; }
+        private Preferences preference { get; set; }
 
         public Contact(string nameAndSurname, string phoneNumber, Preferences preference)
         {
             this.nameAndSurname = nameAndSurname;
             this.phoneNumber = phoneNumber;
             this.preference = preference;
+        }
+
+        public void EditPreferece(Preferences preference)
+        {             
+            this.preference = preference;
+        }
+
+        public Preferences GetPreference()
+        {
+            return preference;
         }
 
         public override bool Equals(object? obj)
@@ -38,7 +48,5 @@ namespace Internship_3_OOP.Classes
                    $"\tNumber: {phoneNumber}\n" +
                    $"\tPreference: {preference}\n";
         }
-
-        
     }
 }
