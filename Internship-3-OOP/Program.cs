@@ -1,9 +1,6 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using Internship_3_OOP.Classes;
 using Internship_3_OOP.Enums;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.ComponentModel.Design;
 
 Loop loopState = Loop.CONTINUE;
 const int MAX_PHONE_NUM_LENGTH = 15;
@@ -12,20 +9,20 @@ Dictionary<Contact, List<Call>> contacts = new()
 {
     { new Contact("Ivan", "123456789", Preferences.FAVOURITE), 
         new List<Call>() { 
-            new Call(new DateTime(2023,11,23,23,2,5)), 
-            new Call(new DateTime(2023, 11, 26, 16, 15, 4)) 
+            new Call(new DateTime(2023,11,23,23,2,5), CallStatus.INCOMING), 
+            new Call(new DateTime(2023, 11, 26, 16, 15, 4), CallStatus.OUTGOING) 
         } 
     },
     { new Contact("Marko", "987654321", Preferences.REGULAR), 
         new List<Call>() { 
-            new Call(new DateTime(2023, 11, 11, 13, 2, 4)), 
-            new Call(new DateTime(2023, 11, 15, 14, 21, 15)) 
+            new Call(new DateTime(2023, 11, 11, 13, 2, 4), CallStatus.MISSED), 
+            new Call(new DateTime(2023, 11, 15, 14, 21, 15), CallStatus.INCOMING) 
         } 
     },
     { new Contact("Sime", "121212121", Preferences.BLOCKED), 
         new List<Call>() { 
-            new Call(new DateTime(2023, 10, 20, 11, 2, 4)), 
-            new Call(new DateTime(2023, 9, 17, 11, 5, 4)) 
+            new Call(new DateTime(2023, 10, 20, 11, 2, 4), CallStatus.OUTGOING), 
+            new Call(new DateTime(2023, 9, 17, 11, 5, 4), CallStatus.MISSED) 
         } 
     },
 };
@@ -37,7 +34,9 @@ do{
         "2 - Dodavanje novih kontakata u imenik\n" +
         "3 - Brisanje kontakata iz imenika\n" +
         "4 - Editiranje preference kontakta\n" +
-        "5 - Upravljanje kontaktom\n"
+        "5 - Upravljanje kontaktom\n" +
+        "6 - Ispis svih poziva\n" +
+        "7 - IZLAZ"
     );
     Console.WriteLine("Odaberi opciju: ");
     var choice = InputNonEmptyString("Odabir opcije");
@@ -56,11 +55,12 @@ do{
             EditContactPreference();
             break;
         case "5":
-            var contact = FindContact();
-            Console.Clear();
-            ContactManagmentSubmenu(contact);
+            ContactManagmentSubmenu();
             break;
         case "6":
+            PrintAllCalls();
+            break;
+        case "7":
             loopState = Loop.BREAK;
             Console.WriteLine("Izlaz...");
             break;
@@ -70,8 +70,6 @@ do{
     }
     Console.Clear();
 } while(loopState == Loop.CONTINUE);
-
-
 
 void PrintAllContacts()
 {
@@ -174,10 +172,13 @@ void EditContactPreference()
     } while (loopState == Loop.CONTINUE);
 }
 
-void ContactManagmentSubmenu(Contact contact)
+void ContactManagmentSubmenu()
 {
     Loop loopState = Loop.CONTINUE;
-    do{
+    var contact = FindContact();
+    Console.Clear();
+    do
+    {
         Console.WriteLine(contact.ToString());
         Console.WriteLine(
             "SUBMENU:\n" +
@@ -219,6 +220,23 @@ void PrintAllContactCalls(Contact contact)
     foreach (var call in callsSortedByDate)
     {
         Console.WriteLine(call.ToString());
+    }
+    ContinueAndClearConsole();
+}
+
+void PrintAllCalls()
+{
+    Console.WriteLine(
+           $"\nSVI POZIVI:\n" +
+           "****************************\n"
+    );
+    foreach (var (contact, calls) in contacts)
+    {
+        var callsSortedByDate = calls.OrderBy(call => call.GetTime());
+        foreach (var call in callsSortedByDate)
+        {
+            Console.WriteLine(call.ToString());
+        }
     }
     ContinueAndClearConsole();
 }
@@ -295,20 +313,18 @@ string InputPhoneNumber()
 {
     string phoneNum = "";
     bool success;
-    do
-    {
-        success = int.TryParse(Console.ReadLine(), out int input);
+    do{
+        phoneNum = InputNonEmptyString();
+        success = long.TryParse(phoneNum, out long input);
         if (!success)
         {
-            Console.WriteLine("Broj mobitela može sadržavat samo znamenke, pokušaj ponovo\n");
+            Console.WriteLine("Broj mobitela mora sadržavat samo znamenke, pokušaj ponovo\n");
             continue;
         }
             
-        phoneNum = input.ToString();
         success = phoneNum.Length <= MAX_PHONE_NUM_LENGTH;
         if (!success)
-            Console.WriteLine("Broj mobitela može imat najviše 15 znamenki, pokušaj ponovo\n");
-
+            Console.WriteLine($"Broj mobitela može imat najviše {MAX_PHONE_NUM_LENGTH} znamenki, pokušaj ponovo\n");
     } while (!success);
     return phoneNum;
 }
@@ -317,9 +333,9 @@ Loop ConfirmationDialog()
 {
     var option = InputNonEmptyString();
 
-    if (option.ToLower() == "da"){
+    if (option.ToLower() == "da")
         return Loop.CONTINUE;
-    }
+
     return Loop.BREAK;
 }
 
@@ -328,9 +344,8 @@ Loop ConfirmationDialogForDataChange()
     var option = InputNonEmptyString();
 
     if (option.ToLower() == "da")
-    {
         return Loop.BREAK;
-    }
+    
     return Loop.CONTINUE;
 }
 

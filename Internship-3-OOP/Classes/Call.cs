@@ -12,10 +12,10 @@ namespace Internship_3_OOP.Classes
         private DateTime timeOfCall;
         private CallStatus status;
        
-        public Call(DateTime dateTime)
+        public Call(DateTime dateTime, CallStatus status)
         {
             timeOfCall = dateTime;
-            status = CallStatus.OUTGOING;
+            this.status = status;
         }
 
         public Call(CallStatus status)
@@ -31,8 +31,8 @@ namespace Internship_3_OOP.Classes
         public override string ToString()
         {
             return $"Call: \n" +
-                   $"\tTime of call: {timeOfCall}" +
-                   $"\tStatus: {status}";
+                   $"\tTime of call: {timeOfCall}\n" +
+                   $"\tStatus: {status}\n";
         }
 
         public override bool Equals(object obj)
