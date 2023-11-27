@@ -1,9 +1,4 @@
 ﻿using Internship_3_OOP.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Internship_3_OOP.Classes
 {
@@ -34,8 +29,7 @@ namespace Internship_3_OOP.Classes
                    $"\tTime of call: {timeOfCall}\n" +
                    $"\tStatus: {status}\n";
         }
-
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (obj == null || GetType() != obj.GetType())
             {
